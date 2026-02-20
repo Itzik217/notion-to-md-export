@@ -20,6 +20,9 @@ app.get("/export", async (req, res) => {
     // Fix 2 — Remove "plain text" from code blocks
     md = md.replace(/```plain text/g, "```");
     
+    // Fix 3 — Remove padding spaces inside table cells
+    md = md.replace(/\| +([^|]+?) +\|/g, "| $1 |");
+    
     res.json({ markdown: md });
   } catch (err) {
     res.status(500).json({ error: err.message });
