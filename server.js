@@ -20,8 +20,11 @@ app.get("/export", async (req, res) => {
     // Fix 2 — Remove "plain text" from code blocks
     md = md.replace(/```plain text/g, "```");
     
-    // Fix 3 — Remove padding spaces inside table cells
-    md = md.replace(/\| +([^|]+?) +\|/g, "| $1 |");
+    // Fix 3 — Clean table cell padding
+    md = md.split("\n").map(line => {
+      if (!line.startsWith("|")) return line;
+      return line.split("|").map(cell => " " + cell.trim() + " ").join("|");
+    }).join("\n");
     
     res.json({ markdown: md });
   } catch (err) {
