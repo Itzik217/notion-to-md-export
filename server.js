@@ -11,7 +11,19 @@ app.get("/export", async (req, res) => {
     const pageId = req.query.page_id;
     const mdblocks = await n2m.pageToMarkdown(pageId);
     const mdString = n2m.toMarkdownString(mdblocks);
-    res.json({ markdown: mdString.parent });
+    
+    let md = mdString.parent;
+    
+    // Fix 1 — Remove extra blank lines (3+ newlines become 2)
+    md = md.replace(/\n{3,}/g, "\n\n");
+    
+    // Fix 2 — Remove "plain text" from code blocks
+    md = md.replace(/```plain text/g, "```");
+    
+    // Fix 3 — Compact table spacing
+    md = md.replace(/\| +/g, "| ").replace(/ +\|/g, " |");
+    
+    res.json({ markdown: md });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
