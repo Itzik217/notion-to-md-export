@@ -19,17 +19,18 @@ app.get("/export", async (req, res) => {
     
     // Fix 2 — Remove "plain text" from code blocks
     md = md.replace(/```plain text/g, "```");
-    
-    // Fix 3 — Clean table cells and fix separator rows
+
+    // Fix 3 — Clean tables
     md = md.split("\n").map(line => {
-      if (!line.startsWith("|")) return line;
-      // Fix separator rows like | ----- | ------ | to | --- | --- |
-      if (line.match(/^\|[\s\-|]+\|$/)) {
-        const cols = line.split("|").filter(c => c.trim().length > 0);
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("|")) return line;
+      // Fix separator rows
+      if (trimmed.match(/^\|[\s\-|]+\|$/)) {
+        const cols = trimmed.split("|").filter(c => c.trim().replace(/-/g, "").length === 0 && c.trim().length > 0);
         return "|" + cols.map(() => " --- |").join("");
       }
-      // Trim each cell
-      return "|" + line.split("|").slice(1, -1).map(cell => " " + cell.trim() + " |").join("");
+      // Trim each cell, remove trailing spaces
+      return "|" + trimmed.split("|").slice(1, -1).map(cell => " " + cell.trim() + " |").join("");
     }).join("\n");
     
     res.json({ markdown: md });
